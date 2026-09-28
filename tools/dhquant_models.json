@@ -1,0 +1,148 @@
+{
+  "_doc": "dhquant model registry. Paths are for the machine the tools run on (gx10). '~' is expanded. sensbank is the folder under <repo>/sensbank that holds this model's measured tables.",
+  "qwen3-4b": {
+    "desc": "Qwen3-4B, the Z-Image / FLUX.2 klein 4B text encoder (comfy qwen_3_4b.safetensors)",
+    "sensbank": "qwen3-4b_6c671498",
+    "model_arg": "4b",
+    "te": "~/sens2/qwen_3_4b.safetensors",
+    "bf16_gguf": "~/sens2/qwen3_4b_BF16.gguf",
+    "imatrix": "sensbank:imatrix.npz",
+    "imatrix_gguf": "sensbank:imat.gguf",
+    "prompts": "sensbank:prompts.json",
+    "products": {
+      "zimage-dit": "~/ComfyUI_lab/models/diffusion_models/z_image_turbo_nvfp4.safetensors",
+      "klein-txt-in": "~/sens2/klein4b_txt_in.safetensors"
+    },
+    "weights": "zimage.real=1,klein.real=1,klein.pad=0.5",
+    "layers": 36,
+    "chunk": 2,
+    "verify": true,
+    "source": {
+      "hf_repo": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "local_hf": "~/qwen3_4b_hf",
+      "note": "the BF16/F16 GGUF is converted from these HF shards with vendor/llama.cpp convert_hf_to_gguf.py",
+      "outtype": "bf16"
+    }
+  },
+  "qwen3vl-8b-heretic": {
+    "desc": "Qwen3-VL-8B heretic, the QI2.1 text encoder we ship (qwen3vl_8b_heretic-Q4_K_M-imat.gguf)",
+    "sensbank": "qwen3vl-8b-heretic_8d990a89",
+    "model_arg": "8b",
+    "te_hf": "~/qi21_te_heretic_hf",
+    "bf16_gguf": "~/q8b/heretic_8b_bf16.gguf",
+    "imatrix": "sensbank:imat.gguf",
+    "imatrix_gguf": "sensbank:imat.gguf",
+    "prompts": "sensbank:prompts.json",
+    "products": {
+      "qi21-dit": "~/qi21_dit/qwen_image_2.1_bf16.safetensors"
+    },
+    "weights": "qi21.real=1",
+    "layers": 36,
+    "chunk": 1,
+    "verify": true,
+    "source": {
+      "hf_repo": "pottokao/Qwen-Image-2.1-Text-Encoder-Heretic",
+      "revision": "047e54342fc4bfcd2addd54049db9c90bb74731e",
+      "local_hf": "~/qi21_te_heretic_hf",
+      "note": "the BF16/F16 GGUF is converted from these HF shards with vendor/llama.cpp convert_hf_to_gguf.py",
+      "outtype": "bf16"
+    }
+  },
+  "z-image-engineer-v6": {
+    "desc": "Z-Image-Engineer V6 (Qwen3-4B finetune, merged DoRA r64; fp16 HF weights), a Z-Image text encoder",
+    "sensbank": "z-image-engineer-v6_1560f829",
+    "model_arg": "4b",
+    "te_hf": "~/v6_hf",
+    "bf16_gguf": "~/qv6/v6_f16.gguf",
+    "imatrix": "sensbank:imat.gguf",
+    "imatrix_gguf": "sensbank:imat.gguf",
+    "prompts": "bank:qwen3-4b_6c671498/prompts.json",
+    "products": {
+      "zimage-dit": "~/ComfyUI_lab/models/diffusion_models/z_image_turbo_nvfp4.safetensors"
+    },
+    "weights": "zimage.real=1",
+    "layers": 36,
+    "chunk": 2,
+    "verify": true,
+    "source": {
+      "hf_repo": "BennyDaBall/Z-Image-Engineer-V6",
+      "revision": "7450bb185b5439d89250eb7f53ea09b9e799b9a9",
+      "local_hf": "~/zeng_v6",
+      "note": "the BF16/F16 GGUF is converted from these HF shards with vendor/llama.cpp convert_hf_to_gguf.py",
+      "outtype": "f16"
+    }
+  },
+  "qwen3-8b": {
+    "desc": "Qwen3-8B (official, = Comfy-Org qwen_3_8b.safetensors), the FLUX.2 klein 9B text encoder. klein 9B txt_in is a local ruler only (FLUX non-commercial, not shipped)",
+    "sensbank": "qwen3-8b_895b80d9",
+    "model_arg": "8b",
+    "te_hf": "~/qwen3_8b_hf",
+    "bf16_gguf": "~/sens2/qwen3_8b_BF16.gguf",
+    "imatrix": "sensbank:imat.gguf",
+    "imatrix_gguf": "sensbank:imat.gguf",
+    "prompts": "sensbank:prompts.json",
+    "products": {
+      "klein-txt-in": "~/sens2/klein9b_txt_in.safetensors"
+    },
+    "weights": "klein.real=1,klein.pad=0.5",
+    "layers": 36,
+    "chunk": 1,
+    "verify": true,
+    "source": {
+      "hf_repo": "Qwen/Qwen3-8B",
+      "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+      "local_hf": "~/qwen3_8b_hf",
+      "note": "the BF16/F16 GGUF is converted from these HF shards with vendor/llama.cpp convert_hf_to_gguf.py",
+      "outtype": "bf16"
+    }
+  },
+  "qwen3vl-8b-heretic-ideogram4": {
+    "desc": "Qwen3-VL-8B heretic scored with the Ideogram 4 DiT stage (same weights and bank as qwen3vl-8b-heretic)",
+    "sensbank": "qwen3vl-8b-heretic_8d990a89",
+    "model_arg": "8b",
+    "te_hf": "~/qi21_te_heretic_hf",
+    "bf16_gguf": "~/q8b/heretic_8b_bf16.gguf",
+    "imatrix": "sensbank:imat.gguf",
+    "imatrix_gguf": "sensbank:imat.gguf",
+    "prompts": "sensbank:prompts.json",
+    "products": {
+      "ideogram4-cond": "~/sens2/dits/ideogram4_llm_cond.safetensors"
+    },
+    "weights": "ideogram4.real=1",
+    "layers": 36,
+    "chunk": 1,
+    "verify": true,
+    "source": {
+      "hf_repo": "pottokao/Qwen-Image-2.1-Text-Encoder-Heretic",
+      "revision": "047e54342fc4bfcd2addd54049db9c90bb74731e",
+      "local_hf": "~/qi21_te_heretic_hf",
+      "note": "the BF16/F16 GGUF is converted from these HF shards with vendor/llama.cpp convert_hf_to_gguf.py",
+      "outtype": "bf16"
+    }
+  },
+  "qwen3vl-8b-heretic-boogu": {
+    "desc": "Qwen3-VL-8B heretic scored with the Boogu DiT stage (same weights and bank as qwen3vl-8b-heretic)",
+    "sensbank": "qwen3vl-8b-heretic_8d990a89",
+    "model_arg": "8b",
+    "te_hf": "~/qi21_te_heretic_hf",
+    "bf16_gguf": "~/q8b/heretic_8b_bf16.gguf",
+    "imatrix": "sensbank:imat.gguf",
+    "imatrix_gguf": "sensbank:imat.gguf",
+    "prompts": "sensbank:prompts.json",
+    "products": {
+      "boogu-caption": "~/sens2/dits/boogu_caption_embedder.safetensors"
+    },
+    "weights": "boogu.real=1",
+    "layers": 36,
+    "chunk": 1,
+    "verify": true,
+    "source": {
+      "hf_repo": "pottokao/Qwen-Image-2.1-Text-Encoder-Heretic",
+      "revision": "047e54342fc4bfcd2addd54049db9c90bb74731e",
+      "local_hf": "~/qi21_te_heretic_hf",
+      "note": "the BF16/F16 GGUF is converted from these HF shards with vendor/llama.cpp convert_hf_to_gguf.py",
+      "outtype": "bf16"
+    }
+  }
+}

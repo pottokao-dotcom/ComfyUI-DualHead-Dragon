@@ -1,0 +1,30 @@
+exec(open("test_prefix.py").read().split("def gen(seq, n):")[0])
+import ctypes, llama_cpp
+def first_logits(seq, reuse):
+    be.use_prefix_cache = reuse
+    with be.lock:
+        llama_cpp.llama_set_embeddings(be.ctx, False)
+        be._prefill(seq, False, reuse_prefix=reuse)
+        p = llama_cpp.llama_get_logits_ith(be.ctx, -1)
+        l = np.ctypeslib.as_array(ctypes.cast(p, ctypes.POINTER(ctypes.c_float)), shape=(be.n_vocab,)).copy()
+        llama_cpp.llama_set_embeddings(be.ctx, True)
+    return torch.from_numpy(l)
+seq = chat("pe_i2i.txt", "Make it look like a neon sign", [img])
+la = first_logits(seq, False); la2 = first_logits(seq, False)
+lb = first_logits(seq, True); lc = first_logits(seq, True)
+print("nocache vs nocache: identical %s" % torch.equal(la, la2))
+print("hit vs hit: identical %s" % torch.equal(lb, lc))
+print("nocache vs hit: max|dlogit| %.4f  (logit range %.1f)  top1 same %s  top5 %s / %s" % ((la-lb).abs().max(), la.max()-la.min(), la.argmax()==lb.argmax(), la.topk(5).indices.tolist(), lb.topk(5).indices.tolist()))
+be.use_prefix_cache=False; a = be.generate(seq, max_length=48, do_sample=False)
+be.use_prefix_cache=True;  b = be.generate(seq, max_length=48, do_sample=False)
+k = next((i for i,(x,y) in enumerate(zip(a,b)) if x!=y), None)
+print("greedy diverges at token", k, "of", len(a))
+if k is not None: print("   nocache:", repr(tok.decode(a[:k+3])[-80:])); print("   hit    :", repr(tok.decode(b[:k+3])[-80:]))
+# encode drift with/without other sequences in the KV
+for sl in list(be.prefixes.values()): llama_cpp.llama_memory_seq_rm(be.mem, sl, -1, -1)
+be.prefixes.clear()
+e_clean, _ = be.encode(te_seq)
+be.use_prefix_cache=True; be.generate(seq, max_length=4, do_sample=False)
+e_withcache, _ = be.encode(te_seq)
+c = torch.nn.functional.cosine_similarity(e_clean, e_withcache, dim=-1)
+print("encode clean vs with cached prefixes in KV: identical %s  cos min %.6f  max|d| rel %.2e" % (torch.equal(e_clean, e_withcache), c.min(), ((e_clean-e_withcache).abs().max()/e_clean.abs().max())))

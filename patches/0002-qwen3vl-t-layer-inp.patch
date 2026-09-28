@@ -1,0 +1,13 @@
+diff --git a/src/models/qwen3vl.cpp b/src/models/qwen3vl.cpp
+index 30c08ed35..34ed6cf8a 100644
+--- a/src/models/qwen3vl.cpp
++++ b/src/models/qwen3vl.cpp
+@@ -82,6 +82,8 @@ llama_model_qwen3vl::graph::graph(const llama_model & model, const llm_graph_par
+     ggml_tensor * inp_out_ids = build_inp_out_ids();
+ 
+     for (int il = 0; il < n_layer; ++il) {
++        res->t_layer_inp[il] = inpL;   // DFlash/EAGLE-3 drafts read layer inputs (same as qwen3.cpp)
++
+         ggml_tensor * inpSA = inpL;
+ 
+         // norm

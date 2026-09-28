@@ -1,0 +1,227 @@
+<title>雙頭龍規格對照</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#f6f7f8; --panel:#ffffff; --ink:#1b2126; --ink2:#4a5560; --mute:#7a8691; --line:#dde2e6; --line2:#eef1f3;
+  --accent:#1f6f78; --accent-soft:#e3f0f1;
+  --ok:#2d7a46; --ok-bg:#e5f3ea; --part:#8a6212; --part-bg:#fbf0d9; --todo:#5b6670; --todo-bg:#eceff2; --bad:#a3342c; --bad-bg:#f8e3e1;
+  --code-bg:#f0f3f5;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12171b; --panel:#192026; --ink:#e4e9ed; --ink2:#b3bec7; --mute:#86929c; --line:#2b353d; --line2:#222b32;
+  --accent:#5fb7c0; --accent-soft:#1c3337;
+  --ok:#7fcf98; --ok-bg:#1d3326; --part:#e2b75c; --part-bg:#3a2f16; --todo:#a9b4bd; --todo-bg:#262f36; --bad:#ef8a80; --bad-bg:#3d201d;
+  --code-bg:#20282e; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#12171b; --panel:#192026; --ink:#e4e9ed; --ink2:#b3bec7; --mute:#86929c; --line:#2b353d; --line2:#222b32;
+  --accent:#5fb7c0; --accent-soft:#1c3337;
+  --ok:#7fcf98; --ok-bg:#1d3326; --part:#e2b75c; --part-bg:#3a2f16; --todo:#a9b4bd; --todo-bg:#262f36; --bad:#ef8a80; --bad-bg:#3d201d;
+  --code-bg:#20282e; color-scheme:dark;}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 "IBM Plex Sans","Noto Sans TC",system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+.eyebrow{font:500 12px/1.4 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 30px/1.25 "Noto Sans TC","IBM Plex Sans",sans-serif;margin:6px 0 8px;text-wrap:balance}
+.lede{color:var(--ink2);max-width:72ch;margin:0}
+.meta{font:12px/1.5 "IBM Plex Mono",monospace;color:var(--mute);margin-top:10px}
+h2{font:700 20px/1.3 "Noto Sans TC",sans-serif;margin:38px 0 6px;text-wrap:balance;display:flex;gap:10px;align-items:baseline}
+h2 .tag{font:500 11px "IBM Plex Mono",monospace;color:var(--mute);letter-spacing:.06em}
+.sub{color:var(--ink2);margin:0 0 12px;max-width:80ch}
+.glance{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:18px}
+.glance div{background:var(--panel);padding:12px 14px}
+.glance b{display:block;font:600 22px/1.2 "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.glance span{font-size:13px;color:var(--ink2)}
+.tbl{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line2)}
+th{font:600 12px/1.4 "IBM Plex Sans","Noto Sans TC",sans-serif;color:var(--ink2);background:var(--line2);letter-spacing:.02em;position:sticky;top:0}
+tr.grp td{background:var(--accent-soft);color:var(--accent);font:600 12px "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px}
+td.item{font-weight:600;white-space:nowrap}
+td.src{font:12px/1.5 "IBM Plex Mono",monospace;color:var(--mute);white-space:nowrap}
+code{font:13px "IBM Plex Mono",monospace;background:var(--code-bg);padding:1px 5px;border-radius:3px;word-break:break-word}
+.st{display:inline-block;font:600 11.5px/1.2 "IBM Plex Sans","Noto Sans TC",sans-serif;padding:3px 8px;border-radius:999px;white-space:nowrap;margin-bottom:3px}
+.ok{color:var(--ok);background:var(--ok-bg)} .part{color:var(--part);background:var(--part-bg)} .todo{color:var(--todo);background:var(--todo-bg)} .bad{color:var(--bad);background:var(--bad-bg)}
+td .note{display:block;color:var(--ink2);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0 0 12px;font-size:13px;color:var(--ink2)}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.fcard{background:var(--panel);border:1px solid var(--line);padding:14px 16px}
+.fcard h3{font:600 15px/1.3 "Noto Sans TC",sans-serif;margin:0 0 4px}
+.fcard .src{font:12px "IBM Plex Mono",monospace;color:var(--mute);margin-bottom:8px;display:block}
+.chain{font:12.5px/1.9 "IBM Plex Mono",monospace;color:var(--ink);background:var(--code-bg);padding:8px 10px;overflow-x:auto;white-space:nowrap}
+.fcard ul{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:13.5px}
+.budget td.n{font-family:"IBM Plex Mono",monospace;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.budget tr.sum td{font-weight:600;border-top:2px solid var(--ink)}
+.callout{border-left:3px solid var(--part);background:var(--part-bg);padding:10px 14px;margin:12px 0;color:var(--ink)}
+.callout.info{border-color:var(--accent);background:var(--accent-soft)}
+ol.src-list{font-size:13.5px;color:var(--ink2);padding-left:20px}
+ol.src-list code{font-size:12px}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:600px){h1{font-size:24px}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Dual-Head Dragon · Qwen-Image 2.1 · spec sheet</div>
+  <h1>雙頭龍 × Qwen-Image 2.1 原廠規格對照</h1>
+  <p class="lede">雙頭龍＝一顆 Qwen3-VL-8B GGUF 在 VRAM 只載一份，同時兼任 TE（編碼）與 PE-T2I／PE-I2I（改寫），目標把整套塞進 12 GB 卡。本表把原廠支援的每一項規格列出來，逐項標註雙頭龍的現況，方便對照要追到哪裡。</p>
+  <div class="meta">2026-09-24 · 來源：官方 GitHub / HF 模型卡 / ComfyUI 官方節點原始碼 / Comfy-Org 官方範本 / diffusers pipeline · 實測環境 gx10 (GB10)</div>
+  <div class="glance" aria-label="重點數字">
+    <div><b>10</b><span>原廠支援參考圖上限（comfy 節點留到 16 槽）</span></div>
+    <div><b>2048²</b><span>原生 2K 輸出；預設像素預算 1024²</span></div>
+    <div><b>32 px</b><span>尺寸倍數；視覺 1 token＝32×32 px</span></div>
+    <div><b>1 MP</b><span>官方 PE 讀圖上限（1024×1024 像素數）</span></div>
+    <div><b>11.07 GB</b><span>雙頭龍整套權重（Q4 TE＋mmproj＋nvfp4 DiT＋VAE）</span></div>
+  </div>
+</header>
+
+<h2>官方流程 <span class="tag">WORKFLOWS</span></h2>
+<p class="sub">Comfy-Org 官方只出了三個 QI2.1 範本，三個都只用一顆 <code>TextEncodeQwenImage21</code>；雙頭龍節點要做成它的 drop-in 替身（同輸入、同輸出），外加 GGUF 與改寫選項。</p>
+<div class="flow">
+  <div class="fcard">
+    <h3>文生圖 T2I</h3><span class="src">image_qwen_image_2_1_t2i.json</span>
+    <div class="chain">CLIPLoader(qwen_image) → TextEncodeQwenImage21(res 1024, 無圖, 無 VAE) → KSampler ← UNETLoader · EmptyLatentImage → VAEDecode</div>
+    <ul><li>KSampler：25 步、cfg 1、euler / simple（官方 pipeline 用 40 步）</li><li>沒接 QwenImage21Cache</li><li>透明圖靠 prompt 包裝句＋存 PNG</li></ul>
+  </div>
+  <div class="fcard">
+    <h3>圖像編輯 Edit（1–10 張參考圖）</h3><span class="src">image_qwen_image_2_1_image_edit.json</span>
+    <div class="chain">LoadImage×N → TextEncodeQwenImage21(images.image_1..10, vae, res 0) → pos/neg/latent → KSampler ← QwenImage21Cache ← UNETLoader</div>
+    <ul><li>範本 resolution＝0：原尺寸只取整到 32 的倍數</li><li>latent：預設用節點吐的（依 image_1 尺寸）；switch 可改成自訂 EmptyLatent</li><li>範例 prompt 用 <code>&lt;image1&gt;</code>／<code>&lt;image2&gt;</code> 指圖</li></ul>
+  </div>
+  <div class="fcard">
+    <h3>去背 Background removal</h3><span class="src">image_qwen_image_2_1_background_removal.json</span>
+    <div class="chain">同 Edit 子圖、1 張圖；prompt＝"Remove the background, and output a PNG image"</div>
+    <ul><li>輸出 RGBA，靠 VAE 4 通道＋PNG 保留 alpha</li></ul>
+  </div>
+  <div class="fcard">
+    <h3>原廠改寫串接 PE → TE</h3><span class="src">QwenLM/Qwen-Image-2.1 · prompt_rewrite/</span>
+    <div class="chain">PE(Qwen3.5-VL 9B, 看圖) → JSON{rewritten_prompt, wh_ratio, ratio_follow} → pipe(prompt, width/height 依 wh_ratio)</div>
+    <ul><li>PE-T2I、PE-I2I 是兩顆獨立 9B checkpoint，各自的 system prompt</li><li>雙頭龍要把這兩顆塌進 TE 那一顆 8B（生成時掛 LoRA，編碼時卸掉）</li></ul>
+  </div>
+</div>
+
+<h2>規格總表 <span class="tag">SPEC × STATUS</span></h2>
+<div class="legend">
+  <span><span class="st ok">已驗證</span> 實測對上官方</span>
+  <span><span class="st part">部分</span> 有做但未完整驗證</span>
+  <span><span class="st todo">未做</span> 尚未實作</span>
+  <span><span class="st bad">待決</span> 需要決策／有衝突</span>
+</div>
+<div class="tbl"><table>
+<thead><tr><th style="width:15%">項目</th><th style="width:38%">原廠規格</th><th style="width:15%">出處</th><th>雙頭龍現況</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="4">輸入圖片</td></tr>
+<tr><td class="item">參考圖張數</td><td>最多 <b>10</b> 張（image_1…image_10）。comfy 節點的 autogrow 開到 16 槽，但官方只保證 10。範例：6 張人像合團照。</td><td class="src">README · 範本 note · nodes_qwen.py</td><td><span class="st part">部分</span><span class="note">1、2 張出圖跟官方一致；3–10 張還沒測。</span></td></tr>
+<tr><td class="item">圖的角色</td><td>image_1＝編輯目標（canvas），其餘是參考。prompt 用 <code>&lt;image1&gt;</code>…<code>&lt;image10&gt;</code> 指稱；順序＝模型讀取順序（block-causal，後面的區塊看得到前面的）。</td><td class="src">範本 note · diffusers doc</td><td><span class="st ok">已驗證</span><span class="note">模板字串和 token 序列跟官方逐 token 一致。</span></td></tr>
+<tr><td class="item">圖片縮放</td><td><code>resolution</code>＝總像素預算（不是邊長），保持比例，寬高各自取整到 32；預設 1024；0＝不縮放、只取整到 32；模型支援到 2048。<b>同一次縮放</b>同時餵視覺塔和 VAE。</td><td class="src">nodes_qwen.py · diffusers</td><td><span class="st ok">已驗證</span><span class="note">res 1024 和 0 都測過，視覺 token 數跟官方一致（1014／988）。</span></td></tr>
+<tr><td class="item">Alpha 通道</td><td>視覺塔看「alpha 疊在白底上」的 RGB；VAE 保留 4 通道 RGBA。</td><td class="src">nodes_qwen.py · diffusers</td><td><span class="st ok">已驗證</span><span class="note">繼承官方節點後，疊白底由官方程式碼處理；用 RGBA 關羽做 edit，結果跟官方一致。</span></td></tr>
+<tr><td class="item">視覺 token</td><td>patch 16 × merge 2 → 32×32 px 一個 token（1 MP ≈ 1024 token）。comfy 的像素上下限：3,136 到 12,845,056；deepstack 注入第 8、16、24 層。</td><td class="src">qwen3vl.py · qwen_vl.py</td><td><span class="st ok">已驗證</span><span class="note">llama.cpp mtmd 上下限是 8,192 到 16.7M，一般尺寸跟官方一樣。</span></td></tr>
+
+<tr class="grp"><td colspan="4">TE 編碼</td></tr>
+<tr><td class="item">模板</td><td>system「Comprehend and analyze the provided prompt.」；有圖時在 user 開頭插 <code>&lt;imageN&gt;&lt;|vision_start|&gt;&lt;|image_pad|&gt;&lt;|vision_end|&gt;</code>，多張用空白隔開；不加 think 區塊。</td><td class="src">qwen_image21.py · diffusers</td><td><span class="st ok">已驗證</span></td></tr>
+<tr><td class="item">取哪一層</td><td><code>hidden_states[-1]</code>，<b>還沒過</b> final RMSNorm（transformers 4.57 的行為；diffusers 另外用 hook 強制成這樣）。</td><td class="src">qwen_image21.py · diffusers</td><td><span class="st ok">已驗證</span><span class="note">llama.cpp 給的是過了 norm 的值，除以 <code>output_norm.weight</code> 後等價；T2I cos 0.976 / 0.984。</span></td></tr>
+<tr><td class="item">裁切／slots</td><td>丟掉 system turn（第二個 <code>&lt;|im_start|&gt;</code> 之前）。有接 VAE：視覺 token 從輸出拿掉，改記 <code>image_slots</code>，由 DiT 在該位置插入參考 latent。沒接 VAE：保留視覺 token，只靠 TE 帶圖的資訊。</td><td class="src">qwen_image21.py</td><td><span class="st ok">已驗證</span><span class="note">有 VAE：slots 一致，圖後文字 cos 0.97（Q4）／0.999（Q8）。沒 VAE：能跑，但對精度敏感，換紅背景成功率官方 3/3、Q4 1/3、Q8＋f32 mmproj 2/3。</span></td></tr>
+<tr><td class="item">圖的資訊有沒有進去</td><td>文字 token 在 forward 時看過圖，隱狀態帶有圖的資訊。</td><td class="src">—</td><td><span class="st ok">已驗證</span><span class="note">換圖會讓文字隱狀態改變 25–30%；我們的變化方向跟官方一致，cos 0.82–0.87（Q4）。</span></td></tr>
+<tr><td class="item">負面 prompt</td><td>也帶著同一組圖編碼；只有 cfg &gt; 1 才會用到（true CFG，每步計算量變兩倍）。官方預設 cfg 1。</td><td class="src">nodes_qwen.py · diffusers</td><td><span class="st ok">已驗證</span><span class="note">由官方節點處理。</span></td></tr>
+
+<tr class="grp"><td colspan="4">VAE／DiT 端</td></tr>
+<tr><td class="item">參考 latent</td><td><code>vae.encode(縮放後的圖)</code> → 放進 conditioning 的 <code>reference_latents</code>（positive 和 negative 都要）。VAE 空間壓縮 16 倍、64 通道；1 MP 的參考圖＝4,096 個 latent token。</td><td class="src">nodes_qwen.py · diffusers</td><td><span class="st ok">已驗證</span><span class="note">由官方節點處理；edit 單圖、雙圖、去背的 A/B 都跟官方一致。</span></td></tr>
+<tr><td class="item">輸出畫布</td><td>comfy：依 <b>image_1</b> 縮放後的尺寸吐空 latent。diffusers：沒指定寬高時依<b>最後一張</b>圖的比例。尺寸要是 32 的倍數。</td><td class="src">nodes_qwen.py · diffusers</td><td><span class="st ok">已實作</span><span class="note">canvas=encoder 時照官方（image_1）；canvas=rewrite 時依 PE 的 ratio_follow／wh_ratio 決定。</span></td></tr>
+<tr><td class="item">原生尺寸</td><td>1:1 2048×2048 · 4:3 2400×1792 · 3:4 1792×2400 · 3:2 2528×1696 · 2:3 1696×2528 · 16:9 2752×1536 · 9:16 1536×2752</td><td class="src">README</td><td><span class="st ok">已實作</span><span class="note">wh_ratio 換算成 resolution² 像素預算下的尺寸（取整到 32）。</span></td></tr>
+<tr><td class="item">取樣</td><td>官方 40 步、cfg 1（不開 guidance）；comfy 範本 25 步、euler、simple。shift 依影像序列長度計算（base 0.5 / max 1.15 / 4096）。</td><td class="src">diffusers · 範本</td><td><span class="st ok">不受影響</span><span class="note">這是下游 KSampler 的事，雙頭龍只換 TE。</span></td></tr>
+<tr><td class="item">Prefix KV cache</td><td><code>QwenImage21Cache</code>：device 可選 auto／gpu／cpu／off，dtype 可選 default／int8／int4。文字和條件圖的前綴只算一次，每步重用。</td><td class="src">nodes_qwen.py · README</td><td><span class="st ok">相容</span><span class="note">在 DiT 端，照接即可。</span></td></tr>
+<tr><td class="item">透明圖／去背／局部編輯</td><td>RGBA 生成要用固定的 prompt 包裝句；去背用固定 prompt；局部編輯是在圖上畫圈、塗抹標註或另給遮罩圖（都算一般參考圖）。</td><td class="src">README · 範本</td><td><span class="st ok">去背已驗證</span><span class="note">官方花椰菜範例，輸出帶透明 alpha，跟官方一致；局部編輯還沒測。</span></td></tr>
+
+<tr class="grp"><td colspan="4">PE 改寫（雙頭龍要取代的部分）</td></tr>
+<tr><td class="item">改寫 T2I</td><td>詳見下方 PE 官方設定。輸出 <code>{"rewritten_prompt","wh_ratio"}</code>。</td><td class="src">prompt_rewrite/</td><td><span class="st part">能跑</span><span class="note">JSON 解析成功、wh_ratio 有套用到畫布。品質是裸 8B 的水準：約 220 字（官方要 400–500），英文裡混中文。要靠 LoRA 補。</span></td></tr>
+<tr><td class="item">改寫 I2I</td><td>PE 看著圖寫出帶 <code>&lt;imageN&gt;</code> 的指令；輸出 <code>{"rewritten_prompt","wh_ratio","ratio_follow"}</code>。</td><td class="src">prompt_rewrite/</td><td><span class="st part">能跑</span><span class="note">單圖、雙圖都能跑，JSON 解析也成功。裸 8B 會違反語言規則（英文指令卻回中文），雙圖時幾乎照抄原文。要靠 LoRA 補。</span></td></tr>
+<tr><td class="item">圖只讀一次</td><td>（雙頭龍的設計要求）視覺塔的輸出（含 deepstack）跟位置無關，可以快取起來，讓改寫和編碼兩段共用；VAE latent 也只算一次。</td><td class="src">設計</td><td><span class="st ok">已驗證</span><span class="note">視覺輸出依圖片內容快取。i2i 單圖：編碼 1 次、命中 2 次（PE 看圖編一次，正面和負面直接用快取）；雙圖：編碼 2 次、命中 4 次。超過 1.1 MP 時 PE 會另外讀一份縮圖。</span></td></tr>
+<tr><td class="item">LoRA 切換</td><td>（雙頭龍）生成時 scale＝1，編碼時 scale＝0，TE 永遠是 base。</td><td class="src">設計</td><td><span class="st part">已實作・未測</span><span class="note">生成時掛上（llama_set_adapters_lora），編碼前卸下。節點內還沒實測。2026-09-26 在 gx10 用 llama-server 載 v2 LoRA（<code>qi21_pe_master_lora_v2-f16.gguf</code>），每個請求用 <code>lora</code> 欄位切換 scale 1／0：能跑，JSON 輸出正常。</span></td></tr>
+<tr><td class="item">生成加速 EAGLE-3</td><td>（雙頭龍）PE 生成時掛一顆 EAGLE-3 草稿頭，一層，約 0.4B 參數，bf16 799 MB。只加速自回歸生成；TE 編碼只跑一次 forward、不生成，用不到草稿頭，也不受它影響。</td><td class="src">設計 · llama.cpp docs/speculative.md</td><td><span class="st part">架構已驗證・頭要自己練</span><span class="note">只在節點裡做、不改 llama.cpp 的原型已跑通（<code>tools/spec_proto/</code>）。現成的頭太弱（每輪約 2，跟它們自己回報的一致），攝影擴寫反而變慢。目標：頭約 400 MB、擴寫 3 倍速。細節見「差異與待決」的「生成加速」列，以及 <code>docs/DUAL_HEAD_METHOD.md</code>。</span></td></tr>
+<tr><td class="item">VRAM 一份／12 GB</td><td>（雙頭龍）一顆 8B 同時當 TE 和 PE；整套要塞進 12 GB。</td><td class="src">設計</td><td><span class="st part">部分</span><span class="note">節點已經是單一進程、權重載一次；VRAM 還沒實際量過。</span></td></tr>
+</tbody></table></div>
+
+<h2>實作架構 <span class="tag">INHERITANCE</span></h2>
+<p class="sub">用繼承的方式實作，官方程式碼能處理的部分全部交給官方。gx10 路徑：<code>~/ComfyUI_lab/custom_nodes/ComfyUI-DualHeadDragon/</code>。</p>
+<div class="tbl"><table>
+<thead><tr><th style="width:26%">元件</th><th>做什麼</th><th style="width:26%">沿用官方的部分</th></tr></thead>
+<tbody>
+<tr><td class="item">DualHeadBackend</td><td>llama-cpp-python 0.3.35 加 mtmd。一個 model、一個 context，用 <code>llama_set_embeddings</code> 切換編碼和生成；LoRA 只在生成時掛上；視覺輸出依圖片內容做 LRU 快取；圖片用 <code>mtmd_helper_decode_image_chunk</code> 解碼，會一併處理 M-RoPE 位置和 deepstack。</td><td>—</td></tr>
+<tr><td class="item">DHClipModel</td><td>繼承 <code>QwenImage21Qwen3VLClipModel</code>，只覆寫 <code>__init__</code>（不建立 torch 的 8B 權重）、<code>forward</code>（改用 llama.cpp 編碼）、<code>generate</code>（改用 llama.cpp 取樣）。</td><td>tokenizer、模板、裁掉 system turn、丟視覺 token、image_slots</td></tr>
+<tr><td class="item">DualHeadDragonLoader</td><td>用 <code>model_options["qwen3vl_8b_class"]</code> 這個官方掛鉤換掉內層類別，輸出一般的 CLIP。</td><td>官方 <code>TextEncodeQwenImage21</code>、<code>TextGenerate</code> 可以直接接上</td></tr>
+<tr><td class="item">TextEncodeQwenImage21 (Dual-Head)</td><td>繼承官方節點，前面加 PE 改寫；system prompt 可以從下拉選單選檔案，也可以直接貼文字或從別的節點接進來；依改寫結果調整畫布。</td><td><code>super().execute()</code>：縮放、alpha、VAE 參考 latent、latent 輸出；JSON 解析直接用官方 <code>pe_core.py</code></td></tr>
+</tbody></table></div>
+<div class="callout info">視覺塔三方比對（同一張 832×1216 的圖）：HF 對 comfy 平均 cos 0.9956，有 21 個 token 低於 0.95；HF 對 llama.cpp 平均 0.9905，有 39 個 token 低於 0.95。視覺塔裡本來就有一小群對數值敏感的 token，連 HF 和 comfy 之間都對不上，所以這不是哪一家寫錯。改用 f32 的 mmproj 也沒有改善。</div>
+
+<h2>PE 官方設定 <span class="tag">PROMPT ENHANCER</span></h2>
+<p class="sub">出自 <code>prompt_rewrite/pe_core.py</code> 和兩份 system prompt，是官方正式推論用的數值。雙頭龍的 LoRA 蒸餾目標和推論參數以這張表為準。</p>
+<div class="tbl"><table>
+<thead><tr><th style="width:22%">項目</th><th>PE-T2I</th><th>PE-I2I（edit）</th></tr></thead>
+<tbody>
+<tr><td class="item">模型</td><td colspan="2">Qwen3.5-VL 9B，兩顆獨立的 checkpoint，tokenizer 和 chat template 相同；各自有 <code>system_prompt.txt</code>，不能互換</td></tr>
+<tr><td class="item">輸入</td><td>純文字（帶圖直接報錯）</td><td>文字＋1 到 N 張圖；<b>圖先、文字後</b>，順序＝<code>&lt;image1&gt;</code>、<code>&lt;image2&gt;</code>…</td></tr>
+<tr><td class="item">讀圖上限</td><td>—</td><td>每張 ≤ <b>1,048,576 px</b>（1024²），LANCZOS 縮小，<b>不</b>取整到 32</td></tr>
+<tr><td class="item">Thinking</td><td colspan="2"><b>開</b>（<code>enable_thinking=True</code>，模板預先填好 <code>&lt;think&gt;</code>）；答案取 <code>&lt;/think&gt;</code> 之後的部分</td></tr>
+<tr><td class="item">取樣</td><td>temp 1.0 · top_p 0.95 · top_k 20 · <b>presence_penalty 1.5</b></td><td>temp 1.0 · top_p 0.95 · top_k 20 · presence_penalty 0</td></tr>
+<tr><td class="item">max_new_tokens</td><td class="n">16,256</td><td>24,000</td></tr>
+<tr><td class="item">輸出 JSON</td><td><code>{"rewritten_prompt": "...", "wh_ratio": "3:2"}</code></td><td><code>{"rewritten_prompt": "...", "wh_ratio": "", "ratio_follow": "&lt;image1&gt;"}</code>；wh_ratio 和 ratio_follow 只能有一個有值</td></tr>
+<tr><td class="item">語言</td><td>一律寫英文；圖裡要出現的文字保留原本的文字系統</td><td>中文指令寫中文、英文指令寫英文、其他語言寫英文；要畫進圖裡的字另外判斷（指定的字 → 圖裡既有的主要語言 → 指令的語言）</td></tr>
+<tr><td class="item">長度／風格</td><td>約 20 句、400–500 字，不管原始需求多短都一樣長；逐項列舉、顏色要加修飾詞</td><td>指令要精確、可執行；鎖定身份（臉、產品、媒材）；多圖一定要用 <code>&lt;imageN&gt;</code></td></tr>
+<tr><td class="item">比例</td><td colspan="2">16:9 · 4:3 · 3:2 · 9:16 · 1:1 …（對應上方的原生尺寸表）；「2K／4K」只算畫質描述，不能拿來推比例</td></tr>
+</tbody></table></div>
+
+<h2>12 GB 預算 <span class="tag">VRAM</span></h2>
+<p class="sub">gx10 上的實際檔案大小。只算權重，還沒加 KV cache 和計算緩衝區。</p>
+<div class="tbl" style="max-width:640px"><table class="budget" style="min-width:0">
+<thead><tr><th>元件</th><th>檔案</th><th style="text-align:right">GB</th></tr></thead>
+<tbody>
+<tr><td>TE＋PE（一顆）</td><td><code>qwen3vl_8b_heretic-Q4_K_M.gguf</code></td><td class="n">5.03</td></tr>
+<tr><td>視覺塔</td><td><code>mmproj-qwen3vl_8b_heretic-f16.gguf</code></td><td class="n">1.16</td></tr>
+<tr><td>DiT</td><td><code>qwen_image_2.1_nvfp4.safetensors</code>（Q4_K_M gguf 4.34）</td><td class="n">4.20</td></tr>
+<tr><td>VAE</td><td><code>qwen_image_2.1_vae_bf16.safetensors</code></td><td class="n">0.68</td></tr>
+<tr class="sum"><td>合計</td><td></td><td class="n">11.07</td></tr>
+</tbody></table></div>
+<div class="callout">只剩不到 1 GB 給 KV cache、計算緩衝區和 DiT 的 activation。要在 12 GB 跑完整套，TE 和 DiT 得<b>輪流</b>待在 VRAM（編碼完先讓出來），或把 mmproj 降到 q8（約 0.6 GB）、TE 改用更小的量化。這些都要實際量過才算數。</div>
+
+<h2>差異與待決 <span class="tag">OPEN</span></h2>
+<div class="tbl"><table>
+<thead><tr><th style="width:22%">事項</th><th>內容</th><th style="width:22%">建議</th></tr></thead>
+<tbody>
+<tr><td class="item">輸出畫布跟哪張圖</td><td>comfy 跟 image_1，diffusers 跟最後一張（<code>image[-1]</code>）。官方 PE 用 <code>ratio_follow</code> 明確指定跟哪張。</td><td>節點跟 comfy 一樣走 image_1；rewrite=on 時改依 ratio_follow／wh_ratio 決定。</td></tr>
+<tr><td class="item">PE 要不要開 thinking</td><td>官方開著，預算 16k–24k token，在 12 GB 卡上會很慢。blackhole 那輪為了避免 JSON 被截斷而關掉了。</td><td>待決：訓練 LoRA 時用什麼格式，推論就照同樣格式。</td></tr>
+<tr><td class="item">圖只讀一次的尺寸衝突</td><td>PE 讀圖上限 1 MP 且不取整；TE 依 resolution（預設 1024² 取整到 32，範本用 0＝原尺寸）。</td><td>resolution ≤ 1024 時共用同一份 32 取整的圖（偏差 &lt; 3%）；更大時 PE 另外讀一份 ≤1 MP 的縮圖。</td></tr>
+<tr><td class="item">沒接 VAE 的路徑</td><td>官方節點允許有圖但沒接 VAE（保留視覺 token）；三個官方範本都有接 VAE。</td><td>先支援有 VAE 的版本；沒 VAE 的版本需要自己 decode 視覺 token 才拿得到隱狀態。</td></tr>
+<tr><td class="item">生成加速（MTP／EAGLE-3）</td><td>瓶頸在 PE 逐 token 生成（t2i 約 360 token／10 s；LoRA 蒸餾版輸出是英文、約 800 token、格式固定，很適合 speculative）。我們的 8B、原版 Qwen3-VL-8B、官方 PE（Qwen3.5 9B）<b>都沒有 MTP 權重</b>，所以改用外掛草稿頭。
+<br><br><b>選型（2026-09-26）</b>：HF 上現成的頭，bf16 大小：
+<br>・EAGLE-3：Qwen3-4B 437 MB；Qwen3-VL-8B 799 MB（taobao-mnn、AQ-MedAI）
+<br>・DFlash：Qwen3-4B 1,075 MB（z-lab）；8B 只有純文字 Qwen3-8B 版，2,097 MB，跟 VL-8B 權重不同，等於要自己練
+<br>EAGLE-3 比較省，大約是 DFlash 的四成。llama.cpp 兩種都支援（<code>--spec-type draft-eagle3</code>／<code>draft-dflash</code>），節點自帶的 <code>4df29be</code> 也有 <code>eagle3.cpp</code>、<code>dflash.cpp</code>。但實作寫在 <code>common/speculative.cpp</code>，不在 <code>llama.h</code>，vendored bindings 要多包一層才叫得到。
+<br><br><b>實測（gx10，<code>~/spec_test/</code>）</b>：
+<br>・<code>qwen3vl.cpp</code> 沒有設 <code>res-&gt;t_layer_inp[il]</code>（<code>qwen3.cpp</code> 有），第一次 decode 就 <code>GGML_ASSERT(t_layer_inp[il] != nullptr)</code> 掛掉。補一行 <code>res-&gt;t_layer_inp[il] = inpL;</code> 後能跑。補丁版在 <code>~/spec_test/llama.cpp_eagle</code>，沒動共用的 <code>~/llama.cpp</code>。
+<br>・轉出來的 GGUF 中繼資料正確：target_layers [2, 18, 33]，norm_before_residual=False。
+<br>・接受率只有 6–10%（題目 s000004，n_max 8）：
+<br>&nbsp;&nbsp;taobao＋heretic Q4，temp 0：base 100/1552，LoRA 217/3800
+<br>&nbsp;&nbsp;AQ＋heretic Q4，temp 0：base 130/1384，LoRA 216/2192
+<br>&nbsp;&nbsp;AQ＋<b>原廠 Q8</b>，temp 0：base 116/1256 → 不是 heretic 的問題，也不是量化的問題
+<br>&nbsp;&nbsp;AQ，norm_before_residual 翻成 True：3/2392 → 翻了更糟，原設定 False 是對的
+<br>・<b>更新（同日）</b>：寫了一個<b>只在節點裡做、不改 llama.cpp</b> 的原型（<code>tools/spec_proto/eagle_proto.py</code>）。target 用自帶 llama.cpp 的公開 API，靠 <code>cb_eval</code> 攔 <code>l_out-1/17/32</code>；草稿頭用 torch 跑。一般聊天每輪接受約 2.0，跟兩家 model card 自己回報的數字一致（taobao 約 2.0；AQ 在 SGLang 樹狀草稿下 2.49）。<b>所以實作是對的，是現成的頭太弱</b>，不是 llama.cpp 的問題。取層輸出（略差）、順序反過來（0.4%）都驗過，原設定是對的。
+<br>・速度（Q8，greedy，K=6）：聊天 27.2 → 28.9 tok/s；攝影擴寫 22.9 → 17.8 tok/s（頭太弱時反而變慢）。
+<br>・其他發現：llama-server 每個請求的 <code>speculative.n_max: 0</code> 不會關掉草稿頭，基準速度要另開一個不掛草稿頭的 server 量。
+<br>・⚠️ heretic Q4 用錯檔了：用的是 <code>~/repo_GGUF/qwen3vl_8b_heretic-Q4_K_M.gguf</code>，sha256 跟 HANDOFF 標「不是發布版、不要用」的舊檔一樣。原廠 Q8 那組不受影響；LoRA 那幾列要用發布版重跑才算數。</td><td>先修好接線，讓現成的頭在原廠本體上接受率回到正常（六七成），再用 LoRA 學生自己的輸出微調頭。要拚 3 倍再考慮 DFlash（多約 0.6 GB）。<br><br>架構上：一份 model 開兩個 context，擴寫 context 掛 LoRA＋草稿頭，編碼 context 什麼都不掛，換模式就換 context，不用手動開關。</td></tr>
+<tr><td class="item">PE 的 system prompt KV</td><td>已經實作 prefix 快取（多條 sequence 加共用 KV）：prefill 時間 t2i 從 0.76 s 降到 0.04 s，i2i 從 1.98 s 降到 0.49 s；換 LoRA 時會自動重建。</td><td>已完成。</td></tr>
+<tr><td class="item">TE 用 Q4 還是 Q8</td><td>有接 VAE 的官方流程：Q4 出圖就跟官方一致。沒接 VAE：Q4 明顯較差（換紅背景 1/3 成功），Q8＋f32 mmproj 接近官方（2/3）。Q8 是 8.7 GB，Q4 是 5.0 GB。</td><td>之後處理 12 GB 時一起決定；Q8 GGUF 已經轉好在 gx10 上。</td></tr>
+<tr><td class="item">heretic 版的 mmproj</td><td>目前只有 heretic 版 mmproj；heretic 只改 LLM，視覺塔應該跟原版相同。</td><td>跟原版 bf16 的視覺塔逐 tensor 比對一次。</td></tr>
+</tbody></table></div>
+
+<h2>出處 <span class="tag">SOURCES</span></h2>
+<ol class="src-list">
+  <li>QwenLM/Qwen-Image-2.1 README 與 <code>prompt_rewrite/</code>（pe_core.py、run_transformers.py、system_prompt_t2i.txt、system_prompt_edit.txt）— <a href="https://github.com/QwenLM/Qwen-Image-2.1" target="_blank" rel="noopener">github.com/QwenLM/Qwen-Image-2.1</a></li>
+  <li>HF 模型卡 Qwen/Qwen-Image-2.1；Comfy-Org/Qwen-Image-2.1 檔案清單</li>
+  <li>Comfy-Org/workflow_templates：<code>image_qwen_image_2_1_t2i.json</code>、<code>_image_edit.json</code>、<code>_background_removal.json</code></li>
+  <li>ComfyUI（gx10 lab 版 1568e6c）：<code>comfy_extras/nodes_qwen.py</code>、<code>comfy/text_encoders/qwen_image21.py</code>、<code>qwen3vl.py</code>、<code>qwen_vl.py</code>、<code>ldm/qwen_image21/model.py</code></li>
+  <li>diffusers main：<code>pipelines/qwenimage21/pipeline_qwenimage21.py</code> 與 API 文件</li>
+  <li>雙頭龍實測：gx10 <code>~/dual_head_gguf/val_vision.py</code>、<code>dh_vision.py</code>；原始資料存在 <code>~/dual_head_gguf/official/</code></li>
+</ol>
+</div>
