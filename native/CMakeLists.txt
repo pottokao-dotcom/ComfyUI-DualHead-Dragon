@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT LLAMA_SRC OR NOT LLAMA_BUILD)
     message(FATAL_ERROR "pass -DLLAMA_SRC=<vendor/llama.cpp> -DLLAMA_BUILD=<its build dir>")
 endif()
-add_library(dh_spec SHARED dh_spec.cpp)
+add_library(dh_spec SHARED dh_spec.cpp dh_tree.cpp)
 target_include_directories(dh_spec PRIVATE ${LLAMA_SRC}/include ${LLAMA_SRC}/common ${LLAMA_SRC}/ggml/include ${LLAMA_SRC}/vendor)
 set(_dirs ${LLAMA_BUILD}/bin ${LLAMA_BUILD}/bin/Release ${LLAMA_BUILD}/lib ${LLAMA_BUILD}/lib/Release
           ${LLAMA_BUILD}/common ${LLAMA_BUILD}/common/Release ${LLAMA_BUILD}/src ${LLAMA_BUILD}/src/Release

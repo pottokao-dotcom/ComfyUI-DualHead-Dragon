@@ -1,0 +1,116 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index 6fdfa4dc3..6097b3860 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -20,6 +20,23 @@
+ #include <map>
+ #include <cinttypes>
+ 
++// DH: last DFlash2 selector lattice of sequence 0 (see common_speculative_impl_draft_dflash::draft)
++struct dh_lattice_t { int32_t n_block = 0, top_k = 0; std::vector<float> data; };
++static thread_local dh_lattice_t g_dh_lattice;
++extern "C"
++#if defined(_WIN32)
++__declspec(dllexport)
++#else
++__attribute__((visibility("default")))
++#endif
++int dh_dflash2_lattice(const float ** data, int32_t * n_block, int32_t * top_k) {
++    if (g_dh_lattice.n_block <= 0) {
++        return 0;
++    }
++    *data = g_dh_lattice.data.data(); *n_block = g_dh_lattice.n_block; *top_k = g_dh_lattice.top_k;
++    return 1;
++}
++
+ #define SPC_DBG(fmt, ...) LOG_DBG("spec %12.*s: " fmt, 12, __func__, __VA_ARGS__)
+ #define SPC_TRC(fmt, ...) LOG_TRC("spec %12.*s: " fmt, 12, __func__, __VA_ARGS__)
+ #define SPC_INF(fmt, ...) LOG_INF("spec %12.*s: " fmt, 12, __func__, __VA_ARGS__)
+@@ -1102,19 +1119,16 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+ 
+         const int32_t n_tokens = batch_in.n_tokens;
+ 
+-        // per-seq inclusive batch range (assumes each seq's tokens are contiguous in the batch)
+-        std::vector<int32_t> i_batch_beg(n_seq, -1);
+-        std::vector<int32_t> i_batch_end(n_seq, -1);
++        // per-seq batch rows (DH: a gathered row list instead of a contiguous range, so a tree-verify batch can feed
++        // only the accepted path, whose rows are not adjacent; identical for the usual contiguous sequence)
++        std::vector<std::vector<int32_t>> rows_of(n_seq);
+         for (int32_t k = 0; k < n_tokens; ++k) {
+             GGML_ASSERT(batch_in.n_seq_id[k] == 1);
+             const llama_seq_id seq_id = batch_in.seq_id[k][0];
+             if (seq_id < 0 || seq_id >= (llama_seq_id) n_seq) {
+                 continue;
+             }
+-            i_batch_end[seq_id] = k;
+-            if (i_batch_beg[seq_id] < 0) {
+-                i_batch_beg[seq_id] = k;
+-            }
++            rows_of[seq_id].push_back(k);
+         }
+ 
+         auto * ctx_tgt = this->params.ctx_tgt;
+@@ -1123,14 +1137,15 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+         const int32_t n_ubatch = (int32_t) llama_n_ubatch(ctx_dft);
+ 
+         for (llama_seq_id seq_id = 0; seq_id < (llama_seq_id) n_seq; ++seq_id) {
+-            if (i_batch_beg[seq_id] < 0) {
++            const auto & rows = rows_of[seq_id];
++            if (rows.empty()) {
+                 continue;
+             }
+-            const int32_t n_rows = i_batch_end[seq_id] - i_batch_beg[seq_id] + 1;
++            const int32_t n_rows = (int32_t) rows.size();
+ 
+             // an M-RoPE image pins all its rows to one position, so a windowed draft
+             // cache cannot free cells for it - skip it, the draft can jump over the gap
+-            const bool pos_pinned = batch_in.pos[i_batch_beg[seq_id]] == batch_in.pos[i_batch_end[seq_id]];
++            const bool pos_pinned = batch_in.pos[rows.front()] == batch_in.pos[rows.back()];
+             if (has_embeddings && n_rows > 1 && pos_pinned) {
+                 continue;
+             }
+@@ -1148,13 +1163,13 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+                     }
+                     for (int32_t i = 0; i < n_chunk; ++i) {
+                         float       * dst = batch_inject.embd + (size_t) i * n_embd_enc + k * (size_t) n_embd_tgt;
+-                        const float * src = layer + (size_t) (i_batch_beg[seq_id] + offset + i) * n_embd_tgt;
++                        const float * src = layer + (size_t) rows[offset + i] * n_embd_tgt;
+                         std::memcpy(dst, src, (size_t) n_embd_tgt * sizeof(float));
+                     }
+                 }
+ 
+                 for (int32_t i = 0; i < n_chunk; ++i) {
+-                    const llama_pos p = batch_in.pos[i_batch_beg[seq_id] + offset + i];
++                    const llama_pos p = batch_in.pos[rows[offset + i]];
+                     batch_inject.pos[i] = p;
+                     if (is_mrope) {
+                         batch_inject.pos[1 * n_chunk + i] = p;
+@@ -1235,6 +1250,20 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+                 const float * lattice = llama_get_embeddings_nextn(ctx_dft);
+                 GGML_ASSERT(lattice && "DFlash2 selector produced no lattice");
+ 
++                // DH: keep a copy of this round's selector lattice (per row: top_k candidate ids, then the
++                // top_k x top_k predecessor -> candidate scores) so a caller can build a token tree from it
++                // (ComfyUI-DualHeadDragon native/dh_tree.cpp). Read with dh_dflash2_lattice().
++                if (seq_id == 0) {
++                    const size_t w = (size_t) selector_top_k * (1 + selector_top_k);
++                    g_dh_lattice.n_block = n_block_tokens;
++                    g_dh_lattice.top_k   = selector_top_k;
++                    g_dh_lattice.data.resize((size_t) n_block_tokens * w);
++                    for (int32_t i = 0; i < n_block_tokens; ++i) {
++                        std::memcpy(g_dh_lattice.data.data() + (size_t) i * w,
++                                    lattice + (size_t) (beg + i) * n_embd_dec, w * sizeof(float));
++                    }
++                }
++
+                 int32_t predecessor = 0;
+                 for (int32_t i = 1; i < n_block_tokens; ++i) {
+                     const float * row = lattice + (size_t) (beg + i) * n_embd_dec;
+@@ -2806,6 +2835,7 @@ void common_speculative_draft(common_speculative * spec) {
+     if (spec == nullptr) {
+         return;
+     }
++    g_dh_lattice.n_block = 0;  // DH: only a lattice from this call is valid
+ 
+     auto & dparams = spec->dparams;
+ 

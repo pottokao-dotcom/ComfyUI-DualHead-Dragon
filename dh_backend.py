@@ -59,6 +59,9 @@ def _spec_lib():
             lib.dh_spec_type.restype = ctypes.c_char_p
             lib.dh_spec_type.argtypes = [ctypes.c_void_p]
             lib.dh_spec_free.argtypes = [ctypes.c_void_p]
+            if hasattr(lib, "dh_spec_set_strategy"):  # tree verification (docs/SPEC_STRATEGY.md); older builds lack it
+                lib.dh_spec_set_strategy.restype = ctypes.c_int
+                lib.dh_spec_set_strategy.argtypes = [ctypes.c_void_p, ctypes.c_int]
             lib.dh_spec_generate.restype = ctypes.c_int
             lib.dh_spec_generate.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int32), ctypes.c_int, ctypes.c_int,
                                              ctypes.c_float, ctypes.c_int, ctypes.c_float, ctypes.c_float, ctypes.c_uint32,
@@ -548,13 +551,16 @@ class DualHeadBackend:
         return self._drafts[key]
 
     def generate(self, seq, max_length=512, do_sample=True, temperature=1.0, top_k=20, top_p=0.95, min_p=0.0,
-                 repetition_penalty=1.0, presence_penalty=0.0, seed=None, lora=None, draft=None, draft_n_max=15):
+                 repetition_penalty=1.0, presence_penalty=0.0, seed=None, lora=None, draft=None, draft_n_max=15,
+                 draft_tree=0):
         """PE role: sample a continuation of seq with the rewrite LoRA attached. Returns generated token ids.
-        draft: a speculative draft GGUF (DFlash etc.) -- same distribution, faster; text-only prompts, no penalties."""
+        draft: a speculative draft GGUF (DFlash etc.) -- same distribution, faster; text-only prompts, no penalties.
+        draft_tree: DFlash2 only, draft tokens verified per round as a tree (0 = off; docs/SPEC_STRATEGY.md)."""
         self.ensure()
         if draft and _spec_lib() is not None and all(isinstance(t, numbers.Integral) for t in seq) \
                 and repetition_penalty == 1.0 and presence_penalty == 0.0:
-            return self._generate_spec(seq, max_length, do_sample, temperature, top_k, top_p, min_p, seed, lora, draft, draft_n_max)
+            return self._generate_spec(seq, max_length, do_sample, temperature, top_k, top_p, min_p, seed, lora, draft, draft_n_max,
+                                       draft_tree)
         with self.lock:
             llama_cpp.llama_set_embeddings(self.ctx, False)
             self._set_lora(lora if lora is not None else self.gen_lora)
@@ -611,12 +617,17 @@ class DualHeadBackend:
                 llama_cpp.llama_set_embeddings(self.ctx, True)
 
 
-    def _generate_spec(self, seq, max_length, do_sample, temperature, top_k, top_p, min_p, seed, lora, draft, n_max):
+    def _generate_spec(self, seq, max_length, do_sample, temperature, top_k, top_p, min_p, seed, lora, draft, n_max,
+                       tree=0):
         with self.lock:
             llama_cpp.llama_set_embeddings(self.ctx, False)
             self._set_lora(lora if lora is not None else self.gen_lora)
             try:
                 h = self._draft(draft, n_max)
+                if hasattr(_spec_lib(), "dh_spec_set_strategy"):
+                    _spec_lib().dh_spec_set_strategy(h, int(tree or 0))
+                elif tree:
+                    logging.warning("DualHeadDragon: this libdh_spec has no tree verification, rebuild (build.py)")
                 ids = (ctypes.c_int32 * len(seq))(*[int(t) for t in seq])
                 max_length = max(1, min(int(max_length), self.n_ctx - len(seq) - 1))
                 out = (ctypes.c_int32 * max_length)()

@@ -7,6 +7,11 @@
 // cb_eval taps the TE role uses, so the two roles do not interfere).
 //
 // Follows examples/speculative-simple/speculative-simple.cpp (single sequence, partial KV removal).
+//
+// Optional tree verification (dh_spec_set_strategy, docs/SPEC_STRATEGY.md): with a DFlash2 draft the verify budget
+// can be spent on a token tree built from the selector lattice (dh_tree.cpp) instead of the greedy line. Off by
+// default; when off the loop below is exactly the plain one.
+#include "dh_tree.h"
 #include "common.h"
 #include "sampling.h"
 #include "speculative.h"
@@ -14,6 +19,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <string>
@@ -33,9 +39,14 @@ struct dh_spec {
     std::string type_name;
     // stats of the last dh_spec_generate
     int n_drafted = 0, n_accept = 0, n_rounds = 0;
+    // strategy (dh_spec_set_strategy): tree verification budget, 0 = off
+    int tree_budget = 0;
 };
 
 extern "C" {
+
+// libllama-common, patches/0003-dflash2-tree-hooks.patch: the last DFlash2 selector lattice of sequence 0
+int dh_dflash2_lattice(const float ** data, int32_t * n_block, int32_t * top_k);
 
 // draft_path: draft GGUF; n_max: max draft tokens per round (clamped to the draft's block size by llama.cpp);
 // n_gpu_layers: draft layers on GPU (-1 = all). Returns NULL on failure.
@@ -83,6 +94,17 @@ DH_SPEC_API void * dh_spec_create(llama_context * ctx_tgt, const char * draft_pa
         fprintf(stderr, "dh_spec_create: %s\n", e.what());
         return nullptr;
     }
+}
+
+// tree_budget: draft tokens verified per round as a tree (0 = off, plain greedy line). Only DFlash2 drafts have a
+// lattice; other types keep the plain loop. Returns the budget in effect.
+DH_SPEC_API int dh_spec_set_strategy(void * handle, int tree_budget) {
+    auto * h = (dh_spec *) handle;
+    if (h == nullptr) {
+        return 0;
+    }
+    h->tree_budget = std::max(0, std::min(tree_budget, 63));
+    return h->tree_budget;
 }
 
 DH_SPEC_API const char * dh_spec_type(void * handle) {
@@ -160,6 +182,31 @@ static int dh_spec_generate_impl(void * handle, const llama_token * prompt, int 
     int n_out = 0;
     h->n_drafted = h->n_accept = h->n_rounds = 0;
     bool done = false;
+
+    // tree verification: one KV sequence per branch. The node's context has 1 + prefix_slots sequences; the cached
+    // system prompts in 1.. are dropped after every speculative run anyway (dh_backend.py), so borrow them.
+    const int n_seq_all = (int) llama_n_seq_max(ctx_tgt);
+    const bool tree_on = h->tree_budget > 0 && n_seq_all > 1;
+    dh_tree tree;
+    llama_batch tbatch = llama_batch_init(tree_on ? h->tree_budget + 1 : 1, 0, n_seq_all);
+    llama_batch pbatch = llama_batch_init(tree_on ? h->tree_budget + 1 : 1, 0, 1);
+    // DH_SPEC_LAT=path (debug / tools/spec_tree): append every round's lattice for offline simulation
+    FILE * lat_f = nullptr;
+    if (const char * lp = getenv("DH_SPEC_LAT")) {
+        lat_f = fopen(lp, "ab");
+    }
+    auto free_batches = [&] {
+        llama_batch_free(batch); llama_batch_free(tbatch); llama_batch_free(pbatch);
+        if (lat_f) {
+            fclose(lat_f);
+        }
+    };
+    if (tree_on) {
+        for (int s = 1; s < n_seq_all; ++s) {
+            llama_memory_seq_rm(llama_get_memory(ctx_tgt), s, -1, -1);
+        }
+    }
+
     while (!done) {
         int n_draft_max = (int) llama_n_ctx(ctx_tgt) - n_past - 2;
         n_draft_max = std::max(0, std::min(n_draft_max, max_new - n_out - 1));
@@ -168,13 +215,125 @@ static int dh_spec_generate_impl(void * handle, const llama_token * prompt, int 
         // the draft may have written past the target's KV while drafting; trim it back to the target's end
         llama_memory_seq_rm(llama_get_memory(ctx_dft), seq, llama_memory_seq_pos_max(llama_get_memory(ctx_tgt), seq) + 1, -1);
 
+        const float * lat = nullptr;
+        int32_t lat_nb = 0, lat_k = 0;
+        if ((tree_on || lat_f) && !draft.empty() && !dh_dflash2_lattice(&lat, &lat_nb, &lat_k)) {
+            lat = nullptr;
+        }
+        if (lat_f && lat) {
+            const int32_t hdr[6] = { 0x4C415431, n_past, id_last, lat_nb, 0, lat_k };
+            fwrite(hdr, sizeof(int32_t), 6, lat_f);
+            fwrite(lat, sizeof(float), (size_t) lat_nb * lat_k * (1 + lat_k), lat_f);
+        }
+        if (tree_on && lat) {
+            // the tree may not go deeper than the (possibly shortened near the end) greedy draft
+            dh_tree_build(lat, lat_nb, lat_k, h->tree_budget, n_seq_all, (int) draft.size(), tree);
+        } else {
+            tree.parent.clear(); tree.depth.clear(); tree.tok.clear();
+        }
+        if (tree.size() > 0) {
+            const int nt = tree.size(), p0 = n_past;
+            auto * mt = llama_get_memory(ctx_tgt);
+            // leaves get sequences 0, 1, ...; every node carries the sequences of the leaves below it
+            std::vector<int> n_kids(nt + 1, 0);
+            for (int i = 0; i < nt; ++i) {
+                n_kids[tree.parent[i]]++;
+            }
+            std::vector<std::vector<llama_seq_id>> sets(nt + 1);
+            int n_leaf = 0;
+            for (int i = 1; i <= nt; ++i) {
+                if (n_kids[i] == 0) {
+                    sets[i].push_back(n_leaf++);
+                }
+            }
+            for (int i = nt; i >= 1; --i) {  // children come after their parent: fold upwards
+                auto & ps = sets[tree.parent[i - 1]];
+                ps.insert(ps.end(), sets[i].begin(), sets[i].end());
+            }
+            // a token shared by several sequences needs them to hold the same history: tag the prefix on each
+            for (int s = 1; s < n_leaf; ++s) {
+                llama_memory_seq_cp(mt, seq, s, -1, -1);
+            }
+            common_batch_clear(tbatch);
+            common_batch_add(tbatch, id_last, p0, sets[0], true);
+            for (int i = 1; i <= nt; ++i) {
+                common_batch_add(tbatch, tree.tok[i - 1], p0 + tree.depth[i - 1], sets[i], true);
+            }
+            if (llama_decode(ctx_tgt, tbatch) != 0) {
+                free_batches();
+                return -1;
+            }
+            // the target samples node by node and walks to the child holding its token
+            llama_tokens ids;
+            std::vector<char> on_path(nt + 1, 0);
+            on_path[0] = 1;
+            int cur = 0, n_acc = 0;
+            while (true) {
+                const llama_token t = common_sampler_sample(smpl.get(), ctx_tgt, cur);
+                common_sampler_accept(smpl.get(), t, true);
+                ids.push_back(t);
+                int nx = -1;
+                for (int i = 1; i <= nt; ++i) {
+                    if (tree.parent[i - 1] == cur && tree.tok[i - 1] == t) {
+                        nx = i;
+                        break;
+                    }
+                }
+                if (nx < 0) {
+                    break;
+                }
+                on_path[nx] = 1;
+                cur = nx;
+                ++n_acc;
+            }
+            // target KV: move the accepted path to sequence 0, drop the borrowed sequences
+            if (std::find(sets[cur].begin(), sets[cur].end(), seq) == sets[cur].end()) {
+                llama_memory_seq_rm(mt, seq, p0 + 1, -1);
+                llama_memory_seq_cp(mt, sets[cur][0], seq, p0 + 1, p0 + 1 + n_acc);
+            }
+            for (int s = 1; s < n_leaf; ++s) {
+                llama_memory_seq_rm(mt, s, -1, -1);
+            }
+            // the draft ingests the root + accepted path only (rows stay aligned with the target batch; others are
+            // tagged with a sequence the single-sequence draft skips)
+            common_batch_clear(pbatch);
+            for (int r = 0; r < tbatch.n_tokens; ++r) {
+                common_batch_add(pbatch, tbatch.token[r], tbatch.pos[r], { on_path[r] ? seq : 1 }, false);
+            }
+            if (!common_speculative_process(h->spec, pbatch)) {
+                free_batches();
+                return -1;
+            }
+            common_speculative_accept(h->spec, seq, (uint16_t) n_acc);
+            n_past = p0 + (int) ids.size();
+            h->n_drafted += nt;
+            h->n_accept += n_acc;
+            h->n_rounds += 1;
+            for (size_t i = 0; i < ids.size(); ++i) {
+                prompt_tgt.push_back(id_last);
+                id_last = ids[i];
+                if (llama_vocab_is_eog(vocab, id_last) || n_out >= max_new) {
+                    done = true;
+                    break;
+                }
+                out[n_out++] = id_last;
+            }
+            draft.clear();
+            llama_memory_seq_rm(mt, seq, n_past, -1);
+            llama_memory_seq_rm(llama_get_memory(ctx_dft), seq, n_past, -1);
+            if (n_out >= max_new) {
+                done = true;
+            }
+            continue;
+        }
+
         common_batch_clear(batch);
         common_batch_add(batch, id_last, n_past++, { seq }, true);
         for (size_t i = 0; i < draft.size(); ++i) {
             common_batch_add(batch, draft[i], n_past + i, { seq }, true);
         }
         if (llama_decode(ctx_tgt, batch) != 0 || !common_speculative_process(h->spec, batch)) {
-            llama_batch_free(batch);
+            free_batches();
             return -1;
         }
         const size_t n_draft = draft.size();
@@ -200,7 +359,7 @@ static int dh_spec_generate_impl(void * handle, const llama_token * prompt, int 
             done = true;
         }
     }
-    llama_batch_free(batch);
+    free_batches();
     llama_memory_seq_rm(llama_get_memory(ctx_tgt), seq, -1, -1);
     llama_memory_seq_rm(llama_get_memory(ctx_dft), seq, -1, -1);
     if (stats) {

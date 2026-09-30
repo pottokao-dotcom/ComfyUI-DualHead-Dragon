@@ -428,6 +428,11 @@ class DualHeadRewrite(io.ComfyNode):
                                        "trained for this encoder + rewrite LoRA. Same output distribution, faster rewrite."),
                 io.Int.Input("draft_n_max", default=15, min=1, max=64, optional=True,
                              tooltip="Max draft tokens per round (clamped to the draft's block size; DFlash b16 -> 15)."),
+                io.Int.Input("draft_tree", default=20, min=0, max=31, optional=True,
+                             tooltip="DFlash2 only (other drafts ignore it). Verify this many draft tokens per round as a "
+                                     "tree (second/third choices where the draft is unsure) instead of one line; 0 = one "
+                                     "line. Same output distribution. 20 with draft_n_max 15: +25% on an RTX 5060 Ti "
+                                     "(docs/SPEC_STRATEGY.md)."),
             ],
             outputs=[
                 io.String.Output(display_name="rewritten_prompt"),
@@ -439,7 +444,7 @@ class DualHeadRewrite(io.ComfyNode):
     @classmethod
     def execute(cls, clip, prompt, system_prompt="none", rewrite_lora="none", lora_strength=1.0, seed=0,
                 max_new_tokens=2048, temperature=0.7, top_p=0.8, top_k=20, thinking=False,
-                system_prompt_text="", draft="none", draft_n_max=15) -> io.NodeOutput:
+                system_prompt_text="", draft="none", draft_n_max=15, draft_tree=20) -> io.NodeOutput:
         backend = _dh_backend(clip)
         dh_comfy.load(clip)  # ComfyUI makes room (and reloads a released backend) before we use it directly
         prod = _PRODUCT_OF.get(id(backend)) or products.PRODUCTS["qwen_image"]
@@ -452,7 +457,8 @@ class DualHeadRewrite(io.ComfyNode):
         dpath = None if draft == "none" else folder_paths.get_full_path_or_raise("dualhead_drafts", draft)
         _t0 = time.perf_counter()
         out = backend.generate(ids, max_length=max_new_tokens, do_sample=temperature > 0, temperature=temperature,
-                               top_k=top_k, top_p=top_p, seed=seed, lora=lora, draft=dpath, draft_n_max=draft_n_max)
+                               top_k=top_k, top_p=top_p, seed=seed, lora=lora, draft=dpath, draft_n_max=draft_n_max,
+                               draft_tree=draft_tree)
         if dpath and getattr(backend, "last_spec", None):
             s = backend.last_spec
             print("[DualHeadDragon] draft: %d tokens in %d rounds, accepted %d/%d drafted, %.2f s (%.1f ms/round)" %
